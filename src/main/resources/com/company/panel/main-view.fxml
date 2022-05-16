@@ -5,17 +5,32 @@
 
 <AnchorPane maxHeight="Infinity" maxWidth="Infinity" minHeight="1000" minWidth="1000" prefHeight="647.0" prefWidth="789.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.panel.RainMakerController">
    <children>
-      <Label layoutX="147.0" layoutY="26.0" prefHeight="39.0" prefWidth="520.0" text="                              WELCOME TO RAINMAKER APP!!!" />
-      <Label layoutX="30.0" layoutY="96.0" prefHeight="24.0" prefWidth="787.0" text="Insert your addresses below; Each in a new line in the order: bitcoinAddress, ERC20Address and then TRC20Address" />
-      <TextArea fx:id="keysText" layoutX="30.0" layoutY="120.0" prefHeight="200.0" prefWidth="931.0" promptText="Address here..." />
-      <Button layoutX="417.0" layoutY="343.0" mnemonicParsing="false" onAction="#onBuildButtonClicked" prefHeight="24.0" prefWidth="203.0" text="BUILD APP" />
-      <Label layoutX="27.0" layoutY="397.0" prefHeight="24.0" prefWidth="192.0" text="Count of Built Apps:" />
+      <Label layoutX="147.0" layoutY="26.0" text="                              WELCOME TO RAINMAKER APP!!!" AnchorPane.leftAnchor="2.0" AnchorPane.rightAnchor="2.0" />
+      <Label layoutX="30.0" layoutY="96.0" text="Insert your addresses below; Each in a new line in the order: bitcoinAddress, ERC20Address and then TRC20Address" AnchorPane.leftAnchor="2.0" AnchorPane.rightAnchor="2.0" />
+      <TextArea fx:id="keysText" layoutX="30.0" layoutY="120.0" promptText="Address here..." AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" />
       <Label fx:id="counter" layoutX="204.0" layoutY="399.0" prefHeight="24.0" prefWidth="141.0" />
-      <Label layoutX="27.0" layoutY="440.0" prefHeight="17.0" prefWidth="141.0" text="Last Build Date:" />
       <Label fx:id="lastBuild" layoutX="204.0" layoutY="443.0" prefHeight="24.0" prefWidth="275.0" />
-      <Button layoutX="45.0" layoutY="343.0" mnemonicParsing="false" onAction="#showHistory" prefHeight="24.0" prefWidth="226.0" text="KEYS HISTORY" />
-      <TextArea fx:id="history" layoutX="36.0" layoutY="500.0" prefHeight="304.0" prefWidth="538.0" promptText="History Will be shown here" />
-      <Button fx:id="downloadBtn" disable="true" layoutX="715.0" layoutY="343.0" mnemonicParsing="false" onAction="#openFileLocation" prefHeight="24.0" prefWidth="226.0" text="OPEN LOCATION" />
-      <TextArea layoutX="584.0" layoutY="500.0" prefHeight="304.0" prefWidth="392.0" promptText="Console Output" fx:id="console" />
+      <TextArea fx:id="history" layoutX="36.0" layoutY="500.0" prefHeight="243.0" prefWidth="489.0" promptText="History Will be shown here" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" />
+<!--      <Button fx:id="downloadBtn" disable="true" layoutX="715.0" layoutY="343.0" mnemonicParsing="false" onAction="#openFileLocation" prefHeight="24.0" prefWidth="226.0" text="OPEN LOCATION" />-->
+      <TextArea fx:id="console" layoutX="584.0" layoutY="500.0" prefHeight="243.0" prefWidth="489.0" promptText="Console Output" AnchorPane.bottomAnchor="8.0" AnchorPane.rightAnchor="8.0" />
+      <GridPane layoutX="75.0" layoutY="354.0" prefHeight="90.0" prefWidth="764.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Button lineSpacing="1000" mnemonicParsing="false" onAction="#showHistory" prefHeight="24.0" prefWidth="226.0" text="KEYS HISTORY" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#onBuildButtonClicked" prefHeight="24.0" prefWidth="203.0" text="BUILD APP" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label prefHeight="24.0" prefWidth="192.0" text="Count of Built Apps:" GridPane.rowIndex="2" />
+            <Label prefHeight="17.0" prefWidth="141.0" text="Last Build Date:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField promptText="Github username" fx:id="gitUser" />
+            <TextField promptText="Github token" GridPane.columnIndex="1" fx:id="gitToken" />
+         </children>
+      </GridPane>
    </children>
 </AnchorPane>

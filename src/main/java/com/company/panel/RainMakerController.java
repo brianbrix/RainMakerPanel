@@ -6,11 +6,13 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -43,6 +45,10 @@ public class RainMakerController {
     protected Button downloadBtn;
     @FXML
     protected TextArea console;
+    @FXML
+    protected TextField gitUser;
+    @FXML
+    protected TextField gitToken;
     private PrintStream ps ;
 
     public static class Console extends OutputStream {
@@ -139,16 +145,20 @@ public class RainMakerController {
         alert.setHeaderText("Results:");
         alert.setContentText("Written to file... Now we build the app.");
         Optional<ButtonType> res = alert.showAndWait();
+        boolean pushed = false;
         if(res.isPresent()) {
             if(res.get().equals(ButtonType.OK))
-               push();
+               pushed = push();
         }
-        lastBuild.setText(LocalDateTime.now().toString());
-        String content = readFile(fileName2, StandardCharsets.UTF_8);
-        String[] contentArray = content.split("###########");
-        int count = contentArray.length;
-        System.out.println(count);
-        counter.setText(String.valueOf(count));
+        if (pushed) {
+            lastBuild.setText(LocalDateTime.now().toString());
+            String content = readFile(fileName2, StandardCharsets.UTF_8);
+            String[] contentArray = content.split("###########");
+            int count = contentArray.length;
+            System.out.println(count);
+            counter.setText(String.valueOf(count));
+            pushed=false;
+        }
 
 
     }
@@ -231,27 +241,47 @@ public class RainMakerController {
         }
         downloadBtn.setDisable(fileLocation == null);
     }
-    static void push() throws GitAPIException, IOException {
-        Repository existingRepo = new FileRepositoryBuilder()
-                .setGitDir(new File("../rainmakerr/.git"))
-                .build();
-        Git git = new Git(existingRepo);
+     boolean push() throws GitAPIException, IOException {
+        try {
+            Repository existingRepo = new FileRepositoryBuilder()
+                    .setGitDir(new File("../rainmakerr/.git"))
+                    .build();
+            Git git = new Git(existingRepo);
 
-        // add remote repo:
-        git.add().addFilepattern("../rainmakerr/").call();
-        CommitCommand commitCommand = git.commit().setAll(true).setMessage("New Key changes...");
-        RevCommit revCommit = commitCommand.call();
-        System.out.println(revCommit.getFullMessage());
+            // add remote repo:
+            git.add().addFilepattern("../rainmakerr/").call();
+            CommitCommand commitCommand = git.commit().setAll(true).setMessage("New Key changes...");
+            RevCommit revCommit = commitCommand.call();
+            System.out.println(revCommit.getFullMessage());
 
-        // push to remote:
-        PushCommand pushCommand = git.push();
-        pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider("brianbrix", "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"));
-        // you can add more settings here if needed
-        Iterable<PushResult> pushResults = pushCommand.call();
-        pushResults.forEach(pushResult -> {
-                    System.out.println(pushResult.getRemoteUpdates());
-                    System.out.println(pushResult.getMessages());
-                }
-        );
+            // push to remote:
+            PushCommand pushCommand = git.push();
+            String user= gitUser.getText();
+            String token= gitToken.getText();
+            System.out.println(user);
+            System.out.println(token);
+            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, token));
+            // you can add more settings here if needed
+            Iterable<PushResult> pushResults = pushCommand.call();
+            pushResults.forEach(pushResult -> {
+                        System.out.println(pushResult.getRemoteUpdates());
+                        System.out.println(pushResult.getMessages());
+                    }
+            );
+            return true;
+        }catch (TransportException exception)
+        {
+            System.out.println(exception.getLocalizedMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Github Error");
+            alert.setHeaderText("Github Error:");
+            alert.setContentText("Please provide your valid username and token.");
+            alert.showAndWait();
+            return false;
+        }
+
+
     }
+
+
 }
