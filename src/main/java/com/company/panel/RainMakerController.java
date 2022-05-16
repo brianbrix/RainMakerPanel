@@ -7,6 +7,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.jgit.api.CommitCommand;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.awt.*;
 import java.io.*;
@@ -58,7 +67,7 @@ public class RainMakerController {
     }
 
     @FXML
-    protected void onBuildButtonClicked() throws IOException, InterruptedException, URISyntaxException {
+    protected void onBuildButtonClicked() throws IOException, InterruptedException, URISyntaxException, GitAPIException {
         System.out.println("Build Started...");
         String[] keys  = keysText.getText().split("\n");
         String [] bcStarts = {"1","3", "5","K", "L", "M", "xpub", "xprv", "m", "n", "2", "9", "c","tpub","tprv","bc1","tb1"};
@@ -113,19 +122,18 @@ public class RainMakerController {
         File file2 = new File(fileName2);
         file2.getParentFile().mkdirs();
         outputWriter = new BufferedWriter(new FileWriter(fileName));
-        outputWriter2 = new BufferedWriter(new FileWriter(file2));
-        outputWriter2.append("\n").append(LocalDateTime.now().toString());
+        outputWriter2 = new BufferedWriter(new FileWriter(fileName2, true));
+        outputWriter2.append(System.getProperty("line.separator")).append(LocalDateTime.now().toString());
         for (String key : keys) {
             outputWriter.write(key);
             outputWriter.newLine();
-            outputWriter2.append("\n").append(key);
+            outputWriter2.append(System.getProperty("line.separator")).append(key);
         }
         outputWriter.flush();
         outputWriter.close();
-        outputWriter2.append("\n").append("###########");
+        outputWriter2.append(System.getProperty("line.separator")).append("###########");
         outputWriter2.flush();
         outputWriter2.close();
-        System.out.println("Keys must not be less tha 3!!!");
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("File Writing");
         alert.setHeaderText("Results:");
@@ -133,7 +141,7 @@ public class RainMakerController {
         Optional<ButtonType> res = alert.showAndWait();
         if(res.isPresent()) {
             if(res.get().equals(ButtonType.OK))
-               runMini();
+               push();
         }
         lastBuild.setText(LocalDateTime.now().toString());
         String content = readFile(fileName2, StandardCharsets.UTF_8);
@@ -153,7 +161,6 @@ public class RainMakerController {
 
     @FXML
     protected void showHistory() throws URISyntaxException {
-        System.out.println("Histo");
         String fileName2 = "../rainmakerkeys/keys.txt";
         if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")) {
             fileName2 = "rainmakerkeys/keys.txt";
@@ -223,5 +230,28 @@ public class RainMakerController {
             p.waitFor();
         }
         downloadBtn.setDisable(fileLocation == null);
+    }
+    static void push() throws GitAPIException, IOException {
+        Repository existingRepo = new FileRepositoryBuilder()
+                .setGitDir(new File("../rainmakerr/.git"))
+                .build();
+        Git git = new Git(existingRepo);
+
+        // add remote repo:
+        git.add().addFilepattern("../rainmakerr/").call();
+        CommitCommand commitCommand = git.commit().setAll(true).setMessage("New Key changes...");
+        RevCommit revCommit = commitCommand.call();
+        System.out.println(revCommit.getFullMessage());
+
+        // push to remote:
+        PushCommand pushCommand = git.push();
+        pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider("brianbrix", "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"));
+        // you can add more settings here if needed
+        Iterable<PushResult> pushResults = pushCommand.call();
+        pushResults.forEach(pushResult -> {
+                    System.out.println(pushResult.getRemoteUpdates());
+                    System.out.println(pushResult.getMessages());
+                }
+        );
     }
 }
