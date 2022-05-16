@@ -157,6 +157,11 @@ public class RainMakerController {
             int count = contentArray.length;
             System.out.println(count);
             counter.setText(String.valueOf(count));
+            Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Build");
+            alert.setHeaderText("Results:");
+            alert.setContentText("New Rainmaker App built successfully!!!");
+            alert.showAndWait();
             pushed=false;
         }
 
